@@ -1,135 +1,69 @@
-import { useState } from "react";
-import * as Yup from "yup";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useState, type SyntheticEvent } from "react";
+import { Tabs, Tab, Box } from "@mui/material";
+
+import Cars from "./games/Cars";
+import Game2048 from "./games/Game2048";
+import SnakeGame from "./games/SnakeGame";
+import WhackAMole from "./games/WhackAMole";
+import FlappyBird from "./games/FlappyBird";
+import LoginForm from "./Form/LoginForm";
 
 import "./App.css";
+import PingPong from "./games/PingPong";
 
-const mockLogin = async (email: string, password: string) => {
-  return new Promise<{ success: boolean; message?: string }>((resolve) => {
-    setTimeout(() => {
-      if (email === "test@example.com" && password === "passWord123") {
-        resolve({ success: true });
-      } else {
-        resolve({ success: false, message: "Invalid credentials" });
-      }
-    }, 1000);
-  });
-};
+export default function App() {
+  const [mainTab, setMainTab] = useState(0);
+  const [gameTab, setGameTab] = useState(0);
 
-const LoginSchema = Yup.object({
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
-    .matches(
-      /^(?=.*[A-Z])(?=.*\d).+$/,
-      "Password must contain at least one uppercase letter and one number"
-    )
-    .required("Password is required"),
-});
-
-const Credentials = () => (
-  <div className="test-credentials" aria-live="polite">
-    <p>
-      <strong>Valid credentials:</strong>
-    </p>
-    <ul>
-      <li>
-        Email: <code>test@example.com</code>
-      </li>
-      <li>
-        Password: <code>passWord123</code>
-      </li>
-    </ul>
-  </div>
-);
-
-export default function LoginForm() {
-  const [serverError, setServerError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleSubmit = async (values: { email: string; password: string }) => {
-    setLoading(true);
-    setServerError("");
-    const res = await mockLogin(values.email, values.password);
-    setLoading(false);
-    if (!res.success) {
-      setServerError(res.message || "Login failed");
-    } else {
-      alert("Login successful!");
-    }
-  };
+  const handleMainChange = (e: SyntheticEvent, newVal: number) =>
+    setMainTab(newVal);
+  const handleGameChange = (e: SyntheticEvent, newVal: number) =>
+    setGameTab(newVal);
 
   return (
-    <div className="login-container">
-      <Credentials />
-      <hr />
-
-      <h1 className="login-title">Sign In</h1>
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        validationSchema={LoginSchema}
-        onSubmit={handleSubmit}
+    <Box sx={{ width: "100%", maxWidth: 900, margin: "0 auto", padding: 2 }}>
+      {/* Main Tabs */}
+      <Tabs
+        value={mainTab}
+        onChange={handleMainChange}
+        centered
+        sx={{ marginBottom: 2 }}
       >
-        {({ isSubmitting }) => (
-          <Form className="login-form" noValidate>
-            <label htmlFor="email">Email</label>
-            <Field
-              type="email"
-              id="email"
-              name="email"
-              placeholder="you@example.com"
-              aria-describedby="email-error"
-            />
-            <ErrorMessage
-              name="email"
-              component="div"
-              className="error"
-              id="email-error"
-            />
+        <Tab label="Form" />
+        <Tab label="Games" />
+      </Tabs>
 
-            <label htmlFor="password">Password</label>
-            <div className="password-wrapper">
-              <Field
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                placeholder="Enter password"
-                aria-describedby="password-error"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            <ErrorMessage
-              name="password"
-              component="div"
-              className="error"
-              id="password-error"
-            />
+      {/* Form Tab */}
+      {mainTab === 0 && <LoginForm />}
 
-            {serverError && (
-              <div className="error server-error">{serverError}</div>
-            )}
+      {/* Games Tab with Subtabs */}
+      {mainTab === 1 && (
+        <Box>
+          <Tabs
+            value={gameTab}
+            onChange={handleGameChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{ marginBottom: 2 }}
+          >
+            <Tab label="Snake" />
+            <Tab label="Whack-a-Mole" />
+            <Tab label="Flappy Bird" />
+            <Tab label="2048" />
+            <Tab label="Cars" />
+            <Tab label="Ping pong" />
+          </Tabs>
 
-            <button
-              type="submit"
-              className="submit-button"
-              disabled={isSubmitting || loading}
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </Form>
-        )}
-      </Formik>
-    </div>
+          <Box sx={{ marginTop: 2 }}>
+            {gameTab === 0 && <SnakeGame />}
+            {gameTab === 1 && <WhackAMole />}
+            {gameTab === 2 && <FlappyBird />}
+            {gameTab === 3 && <Game2048 />}
+            {gameTab === 4 && <Cars />}
+            {gameTab === 5 && <PingPong />}
+          </Box>
+        </Box>
+      )}
+    </Box>
   );
 }
